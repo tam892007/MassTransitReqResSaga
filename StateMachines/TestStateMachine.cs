@@ -31,10 +31,14 @@ namespace Company.StateMachines
 
             During(Created,
                 When(TestEvent2)
-                    .Then(context => context.RespondAsync(new TestSagaResponse
+                    .ThenAsync(async context =>
                     {
-                        Value = "TestSagaResponse"
-                    }))
+                        var endpoint = await context.GetSendEndpoint(context.Saga.ResponseAddress);
+                        await endpoint.Send(new TestSagaResponse
+                        {
+                            Value = "TestSagaResponse"
+                        }, r => r.RequestId = context.Saga.RequestId);
+                    })
                     .Finalize()
             );
 
